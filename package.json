@@ -4,7 +4,7 @@
   "description": "Reads a file from Google Spread Sheets and calculates the average grade of the students",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "Cassiano Belniak",
   "license": "ISC"
