@@ -22,7 +22,7 @@ try {
     console.log(`Reading ${FILE_PATH} file`);
     var workbook = readFile();
     var sheet = getFirstSheet(workbook);
-    console.log('Calculation results...');
+    console.log('Calculating results...');
     var results = getResults(sheet);
     showResults(results);
 } catch (e) {
@@ -60,7 +60,7 @@ function getResults(sheet){
         var p2 = getCellValue(sheet, P2_GRADE_COLUMN + row);
         var p3 = getCellValue(sheet, P3_GRADE_COLUMN + row);
         var absences = getCellValue(sheet, ABSENCES_COLUMN + row);
-        var averageGrade = (p1 + p2 + p3)/3;
+        var averageGrade = Math.round((p1 + p2 + p3)/3);
         var situation = getSituation(averageGrade, absences);
         var finalGrade = getFinalGrade(situation, averageGrade);
         results.push({row, name, inscritionNumber, averageGrade, situation, finalGrade, absences});
@@ -81,12 +81,19 @@ function getSituation(averageGrade, absences){
 function getFinalGrade(situation, averageGrade){
     if (situation !== SITUATION.FINAL)
         return 0;
-    return 100-averageGrade; //(5 <= (m + naf)/2)
+    return Math.round(100-averageGrade); //(5 <= (m + naf)/2)
 }
 
 function showResults(results){
     console.log("Results:");
     results.forEach(result=>{
-        console.log(`${result.inscritionNumber} - ${result.name}: Situação: ${SITUATION_LABEL[result.situation]}. Nota para a aprovação final - ${result.finalGrade}`);
+        console.log(`${pad(result.inscritionNumber.toString(),2)} - ${pad(result.name, 15)}: Situação: ${pad(SITUATION_LABEL[result.situation], 20)} - Nota para a aprovação final - ${result.finalGrade}`);
     });
+}
+
+function pad(string, size){
+    while(string.length < size){
+        string += ' ';
+    }
+    return string;
 }
