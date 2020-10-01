@@ -108,5 +108,9 @@ function updateSpreadSheetWithResults(workbook, sheet, results){
         sheet[SITUATION_COLUMN+result.row] = {"v": SITUATION_LABEL[result.situation]};
         sheet[GRADE_FOR_APPROVATION_COLUMN+result.row] = {'v': result.finalGrade};
     });
-    xlsx.writeFile(workbook, FILE_PATH);
+    try{
+        xlsx.writeFile(workbook, FILE_PATH);
+    } catch (e) {
+        throw `Error when saving file ${FILE_PATH}`;
+    }
 }
