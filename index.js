@@ -10,6 +10,8 @@ const P2_GRADE_COLUMN = "E";
 const P3_GRADE_COLUMN = "F";
 const STARTING_INDEX = 4;
 const ENDING_INDEX = 28;
+const SITUATION_COLUMN = "G";
+const GRADE_FOR_APPROVATION_COLUMN = "H";
 
 const TOTAL_CLASSES = 60;
 
@@ -25,6 +27,9 @@ try {
     console.log('Calculating results...');
     var results = getResults(sheet);
     showResults(results);
+    console.log("Salving results");
+    updateSpreadSheetWithResults(workbook, sheet, results);
+    console.log('Done');
 } catch (e) {
     console.error(e);
 }
@@ -96,4 +101,12 @@ function pad(string, size){
         string += ' ';
     }
     return string;
+}
+
+function updateSpreadSheetWithResults(workbook, sheet, results){
+    results.forEach(result=>{
+        sheet[SITUATION_COLUMN+result.row] = {"v": SITUATION_LABEL[result.situation]};
+        sheet[GRADE_FOR_APPROVATION_COLUMN+result.row] = {'v': result.finalGrade};
+    });
+    xlsx.writeFile(workbook, FILE_PATH);
 }
