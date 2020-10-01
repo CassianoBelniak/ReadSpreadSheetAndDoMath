@@ -14,8 +14,7 @@ const ENDING_INDEX = 28;
 const TOTAL_CLASSES = 60;
 
 const SITUATION = {'APPROVED': 0, 'DISAPPROVED_BY_GRADE':1, 'DISAPPROVED_BY_FREQUENCY':2, 'FINAL': 3};
-
-var p = console.log;
+const SITUATION_LABEL = {0:'Aprovado', 1: 'Reprovado por nota', 2: 'Reprovado por faltas', 3: 'Final'};
 
 // Program main execution
 try {
@@ -62,7 +61,6 @@ function getResults(sheet){
         var p3 = getCellValue(sheet, P3_GRADE_COLUMN + row);
         var absences = getCellValue(sheet, ABSENCES_COLUMN + row);
         var averageGrade = (p1 + p2 + p3)/3;
-        console.log(`${p1} ${p2} ${p3} ${averageGrade}`);
         var situation = getSituation(averageGrade, absences);
         var finalGrade = getFinalGrade(situation, averageGrade);
         results.push({row, name, inscritionNumber, averageGrade, situation, finalGrade, absences});
@@ -88,8 +86,7 @@ function getFinalGrade(situation, averageGrade){
 
 function showResults(results){
     console.log("Results:");
-    console.log(results);
     results.forEach(result=>{
-        console.log(`${result.inscritionNumber} - ${result.name}: Nota para a aprovação final - ${result.finalGrade}`);
+        console.log(`${result.inscritionNumber} - ${result.name}: Situação: ${SITUATION_LABEL[result.situation]}. Nota para a aprovação final - ${result.finalGrade}`);
     });
 }
