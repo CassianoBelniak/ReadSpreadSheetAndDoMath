@@ -31,8 +31,8 @@ async function main(){
         console.log('Calculating results...');
         var results = getResults(sheet);
         showResults(results);
-        //console.log("Salving results");
-        //updateSpreadSheetWithResults(workbook, sheet, results);
+        console.log("Salving results");
+        updateSpreadSheetWithResults(sheet, results);
         console.log('Done');
     } catch (e) {
         console.error(e);
@@ -64,7 +64,6 @@ async function getFirstSheet(workbook){
 }
 
 function getCellValue(sheet, cell){
-    console.log(cell);
     var cell_content = sheet.getCellByA1(cell);
     if (!cell_content)
         throw `The cell ${cell} does not contains any value`;
@@ -118,13 +117,13 @@ function pad(string, size){
     return string;
 }
 
-function updateSpreadSheetWithResults(workbook, sheet, results){
+function updateSpreadSheetWithResults(sheet, results){
     results.forEach(result=>{
-        sheet[SITUATION_COLUMN+result.row] = {"v": SITUATION_LABEL[result.situation]};
-        sheet[GRADE_FOR_APPROVATION_COLUMN+result.row] = {'v': result.finalGrade};
+        sheet.getCellByA1(SITUATION_COLUMN+result.row).value = SITUATION_LABEL[result.situation];
+        sheet.getCellByA1(GRADE_FOR_APPROVATION_COLUMN+result.row).value = result.finalGrade;
     });
     try{
-        xlsx.writeFile(workbook, FILE_PATH);
+        sheet.saveUpdatedCells();
     } catch (e) {
         throw `Error when saving file ${FILE_PATH}`;
     }
