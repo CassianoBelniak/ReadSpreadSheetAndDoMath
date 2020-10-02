@@ -1,6 +1,7 @@
 // Constants declarations
 const xlsx = require('xlsx');
 const readline = require("readline");
+const { resolve } = require('path');
 
 const INSCRITION_COLUMN = "A";
 const NAME_COLUMN = "B";
@@ -21,17 +22,16 @@ const SITUATION_LABEL = {0:'Aprovado', 1: 'Reprovado por nota', 2: 'Reprovado po
 // Program main execution
 async function main(){
     try {
-        console.log('Starting program');
+        console.log('Iniciando programa');
         var filePath = await getFilename();
-        console.log(`Reading ${filePath} file`);
+        console.log(`Lendo arquivo ${filePath}`);
         var workbook = readFile(filePath);
         var sheet = getFirstSheet(workbook);
-        console.log('Calculating results...');
+        console.log('Calculando resultados...');
         var results = getResults(sheet);
         showResults(results);
-        console.log("Salving results");
-        updateSpreadSheetWithResults(filePath, workbook, sheet, results);
-        console.log('Done');
+        await updateSpreadSheetWithResults(filePath, workbook, sheet, results);
+        console.log('Pronto!');
     } catch (e) {
         console.error(e);
     }
@@ -103,6 +103,7 @@ function showResults(results){
     results.forEach(result=>{
         console.log(`${pad(result.inscritionNumber.toString(),2)} - ${pad(result.name, 15)}: Situação: ${pad(SITUATION_LABEL[result.situation], 20)} - Nota para a aprovação final - ${result.finalGrade}`);
     });
+    console.log();
 }
 
 function pad(string, size){
@@ -112,13 +113,21 @@ function pad(string, size){
     return string;
 }
 
-function updateSpreadSheetWithResults(filePath, workbook, sheet, results){
+async function updateSpreadSheetWithResults(filePath, workbook, sheet, results){
+    var response = ""
+    while (response !== 'S' && response !== 'N'){
+        response = await readLineAsync(`Salvar resultados no arquivo ${filePath}?(S/N): `);
+        response = response.toUpperCase();
+    }
+    if (response === 'N')
+        return null;
     results.forEach(result=>{
         sheet[SITUATION_COLUMN+result.row] = {"v": SITUATION_LABEL[result.situation]};
         sheet[GRADE_FOR_APPROVATION_COLUMN+result.row] = {'v': result.finalGrade};
     });
     try{
         xlsx.writeFile(workbook, filePath);
+        console.log('Resultados salvos!');
     } catch (e) {
         throw `Error when saving file ${filePath}`;
     }
