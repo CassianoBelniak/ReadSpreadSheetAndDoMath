@@ -1,0 +1,14 @@
+{
+  "name": "readspreadsheetanddomath",
+  "version": "1.0.0",
+  "description": "Reads a file from Google Spread Sheets and calculates the average grade of the students",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Cassiano Belniak",
+  "license": "ISC",
+  "dependencies": {
+    "xlsx": "^0.16.7"
+  }
+}
