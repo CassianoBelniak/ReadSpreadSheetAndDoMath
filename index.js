@@ -1,6 +1,7 @@
 // Constants declarations
 const xlsx = require('xlsx');
-const FILE_PATH = "Engenharia de Software - Cassiano.xlsx"
+const readline = require("readline");
+const { resolve } = require('path');
 
 const INSCRITION_COLUMN = "A";
 const NAME_COLUMN = "B";
@@ -19,40 +20,48 @@ const SITUATION = {'APPROVED': 0, 'DISAPPROVED_BY_GRADE':1, 'DISAPPROVED_BY_FREQ
 const SITUATION_LABEL = {0:'Aprovado', 1: 'Reprovado por nota', 2: 'Reprovado por faltas', 3: 'Final'};
 
 // Program main execution
-try {
-    console.log('Starting program');
-    console.log(`Reading ${FILE_PATH} file`);
-    var workbook = readFile();
-    var sheet = getFirstSheet(workbook);
-    console.log('Calculating results...');
-    var results = getResults(sheet);
-    showResults(results);
-    console.log("Salving results");
-    updateSpreadSheetWithResults(workbook, sheet, results);
-    console.log('Done');
-} catch (e) {
-    console.error(e);
+async function main(){
+    try {
+        console.log('Iniciando programa');
+        var filePath = await getFilename();
+        console.log(`Lendo arquivo ${filePath}`);
+        var workbook = readFile(filePath);
+        var sheet = getFirstSheet(workbook);
+        console.log('Calculando resultados...');
+        var results = getResults(sheet);
+        showResults(results);
+        await updateSpreadSheetWithResults(filePath, workbook, sheet, results);
+        console.log('Pronto!');
+    } catch (e) {
+        console.error(e);
+    }
 }
+main();
 
 
 // Function Declaration
-function readFile(){
+async function getFilename(){
+    var fileName = await readLineAsync('Entre com o caminho do arquivo: ');
+    return fileName;
+}
+
+function readFile(filePath){
     try {
-        return xlsx.readFile(FILE_PATH);
+        return xlsx.readFile(filePath);
     } catch (e) {
-        throw `Error reading ${FILE_PATH} file`; 
+        throw `Erro ao ler arquivo ${filePath}. Verifique se o arquivo existe e o caminho está correto.`; 
     }
 }
 
 function getFirstSheet(workbook){
     if (workbook.Sheets.length === 0)
-        throw "The file does not contains any sheet";
+        throw "O arquivo não possui nenhuma página";
     return workbook.Sheets[workbook.SheetNames[0]];
 }
 
 function getCellValue(sheet, cell){
     if (!sheet[cell])
-        throw `The cell ${cell} does not contains any value`;
+        throw `A célula ${cell} não possui nenhum valor`;
     return sheet[cell].v;
 }
 
@@ -90,10 +99,11 @@ function getFinalGrade(situation, averageGrade){
 }
 
 function showResults(results){
-    console.log("Results:");
+    console.log("Resultados:");
     results.forEach(result=>{
         console.log(`${pad(result.inscritionNumber.toString(),2)} - ${pad(result.name, 15)}: Situação: ${pad(SITUATION_LABEL[result.situation], 20)} - Nota para a aprovação final - ${result.finalGrade}`);
     });
+    console.log();
 }
 
 function pad(string, size){
@@ -103,14 +113,35 @@ function pad(string, size){
     return string;
 }
 
-function updateSpreadSheetWithResults(workbook, sheet, results){
+async function updateSpreadSheetWithResults(filePath, workbook, sheet, results){
+    var response = ""
+    while (response !== 'S' && response !== 'N'){
+        response = await readLineAsync(`Salvar resultados no arquivo ${filePath}?(S/N): `);
+        response = response.toUpperCase();
+    }
+    if (response === 'N')
+        return null;
     results.forEach(result=>{
         sheet[SITUATION_COLUMN+result.row] = {"v": SITUATION_LABEL[result.situation]};
         sheet[GRADE_FOR_APPROVATION_COLUMN+result.row] = {'v': result.finalGrade};
     });
     try{
-        xlsx.writeFile(workbook, FILE_PATH);
+        xlsx.writeFile(workbook, filePath);
+        console.log('Resultados salvos!');
     } catch (e) {
-        throw `Error when saving file ${FILE_PATH}`;
+        throw `Erro ao salvar arquivo ${filePath}. Verifique se o arquivo ${filePath} está fechado e tente novamente.`;
     }
 }
+
+function readLineAsync(message) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+    return new Promise((resolve, reject) => {
+      rl.question(message, (answer) => {
+        rl.close();
+        resolve(answer);
+      });
+    });
+} 
