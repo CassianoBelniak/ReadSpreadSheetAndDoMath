@@ -1,6 +1,6 @@
 // Constants declarations
 const xlsx = require('xlsx');
-const FILE_PATH = "test-file.xlsx"
+const FILE_PATH = "Engenharia de Software - Cassiano.xlsx"
 
 const INSCRITION_COLUMN = "A";
 const NAME_COLUMN = "B";
