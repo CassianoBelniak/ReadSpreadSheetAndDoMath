@@ -9,6 +9,7 @@
   "author": "Cassiano Belniak",
   "license": "ISC",
   "dependencies": {
+    "google-spreadsheet": "^3.0.13",
     "xlsx": "^0.16.7"
   }
 }
