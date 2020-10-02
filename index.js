@@ -1,6 +1,6 @@
 // Constants declarations
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const FILE_ID = "1nfo8YE9vrpARbdpk9tG7ezeDmfd1G_tK"
+const FILE_ID = "1rusXkmvlUgJ3I271Ckrh32IdpTTgb2WmQxfH6BEXJTw"
 
 const CREDENTIALS_EMAIL = 'defaultconnection@spreadsheetsmaths.iam.gserviceaccount.com';
 const CREDENTIALS_ID = "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC4333yd3SBoiP1\nX78xwNbvyzXguEdwrABCatkjmY7xjdZDgVzX93Nz7slrwF3iM9JMajaUrgwYL3Dp\njryMNfw8z8AbUi7H5q9cXgAbVlwO1SQUf/cxvK2hMf1+uVeyayWjiK/FMPLs5wQi\n6Ju6eLTt7UffrINYktryiUDTnh0HnGTVAoyBLJYwcunqQujDUQrNy6nHbnv78C/I\nZT74/34mESML/PiMUbY91a2r34SScoiIcA8fWdzcwJwlQ1f5X8vfNKH5evmcoPyP\nS1xeg1Lez/J/ZyAoeERZvxjDtCqWX013Dbr01UXUN69KLWSq+PCi8NvaLuhW7MXn\n6gylwxEVAgMBAAECggEABTvEbbr+eBX+NRnJCJBINWEYDRzCXvjrh/XM4FJeRs3I\nWUBd/7ogUVGa75syPS9Q3ntqQKK9smiTZnU1NrXnhlQuQMe+jcekwrVhhOSYtg3I\nF/F4brbD5oqK/c2i4yjf16WMrkUgt16h0hgqImj83DhpnrYcQMNlgdSrWmJBOaAi\nM6BXZfEVYUd5l57TkD+11d6oPAq9Q03mSJYKB+LqBf/+K/DvVWmN6FL93CMUAMVp\njDDFsQmfu0ji9ePZCJIvYVtTyD8TZ7n7wTw3pzkd0o9zjupB80BxSelpq0rspn1f\nTV1plu1yW0cqxAZWW+6VDQeucTIIc45WRhXfO9eR+QKBgQDefFOjkZJqLULO/mnM\n4OOhHkIhOO88l4kn1ONN6jggWFbcpqhlyf0Bw1GrhpBP6Bq6LOtL/jj+qiUOJscR\nmJgSMVLrCP3tt5TIztaJuBSJoSiNgI2kKD++a2UkrFKC/YfJiKEc/VU/Ag2Nf8Rz\nAxWqAgy8jh0+ya9p52tU1QijrQKBgQDUuLdS3uiJ3MdSac6HDip6RH64uJYuLB2t\n0DUZ8lObojDILndGBmiH7PSC3qJbogp9T4ENh9Dm50j4YNPWjQs1Ixt6Nw3GEPFd\nxekgafUTULotyOM7JVHNvSGb9VrVCoFfDl+DvKTLoMvqXMy5dUE2d/Iqj2AfPf7X\nIaBO6nSQCQKBgC3pUgkq/R/T/zlf3s1cixywdc0NRrEmRDNoBxAJCVQDZslZyt5W\ndFNszumqdxVGPF2270dbSr+itMrazbGf36HBc+70iBIKFDXsGPGKfxJ3ozqwEIqT\nk7PjzZdnyA8n6mF4RGcLEBBUiB9vAkcJl+rhSWePnBFc5Unha5Cx9XpxAoGAL83z\nJOSDTbgX8yVkDGXale+eqtSQq3+ui8kmpdYXg/pHDDWlCE+YXjOaH274/a7EvLSJ\nRAkpoTqI44ifErBPvHlPS3/j0IcuNuyrH2Wwdc7GiFOE/V29rIa8btgMuaPKvxnz\nzR8vybMxIFIKkAMRzLPX8EiYSW0dQCuGYzW9TEECgYAZ3fbSbKvbgBHAc1WokZ0S\nLgoiLdV6owLvJXqkFSUsMkaIPHy846hVjz5mvmiK7HGxQayvAt8/rTnkAixpM3t4\nrmE9+JCclIw2FDLNb7pGuoFw/f7JK5B0ccbd4tJ96a6I8Dtn/+lbIRM1cjVvOKVR\nF/Nmw0RD0uHPhdiu7kxKaQ==\n-----END PRIVATE KEY-----\n".replace(/\\n/g, '\n');
@@ -27,7 +27,7 @@ async function main(){
         console.log('Starting program');
         console.log(`Reading ${FILE_ID} file`);
         var workbook = await readFile();
-        var sheet = getFirstSheet(workbook);
+        var sheet = await getFirstSheet(workbook);
         console.log('Calculating results...');
         var results = getResults(sheet);
         showResults(results);
@@ -55,16 +55,20 @@ async function readFile(){
     }
 }
 
-function getFirstSheet(workbook){
+async function getFirstSheet(workbook){
     if (workbook.sheetsByIndex.length === 0)
         throw "The file does not contains any sheet";
-    return workbook.sheetsByIndex[0];
+    var sheet = workbook.sheetsByIndex[0];
+    await sheet.loadCells('A1:' + GRADE_FOR_APPROVATION_COLUMN + ENDING_INDEX);
+    return sheet;
 }
 
 function getCellValue(sheet, cell){
-    if (!sheet.getCellByA1(cell))
+    console.log(cell);
+    var cell_content = sheet.getCellByA1(cell);
+    if (!cell_content)
         throw `The cell ${cell} does not contains any value`;
-    return sheet.getCellByA1(cell);
+    return cell_content.value;
 }
 
 function getResults(sheet){
