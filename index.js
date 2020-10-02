@@ -49,19 +49,19 @@ function readFile(filePath){
     try {
         return xlsx.readFile(filePath);
     } catch (e) {
-        throw `Error reading ${filePath} file`; 
+        throw `Erro ao ler arquivo ${filePath}. Verifique se o arquivo existe e o caminho está correto.`; 
     }
 }
 
 function getFirstSheet(workbook){
     if (workbook.Sheets.length === 0)
-        throw "The file does not contains any sheet";
+        throw "O arquivo não possui nenhuma página";
     return workbook.Sheets[workbook.SheetNames[0]];
 }
 
 function getCellValue(sheet, cell){
     if (!sheet[cell])
-        throw `The cell ${cell} does not contains any value`;
+        throw `A célula ${cell} não possui nenhum valor`;
     return sheet[cell].v;
 }
 
@@ -99,7 +99,7 @@ function getFinalGrade(situation, averageGrade){
 }
 
 function showResults(results){
-    console.log("Results:");
+    console.log("Resultados:");
     results.forEach(result=>{
         console.log(`${pad(result.inscritionNumber.toString(),2)} - ${pad(result.name, 15)}: Situação: ${pad(SITUATION_LABEL[result.situation], 20)} - Nota para a aprovação final - ${result.finalGrade}`);
     });
@@ -129,7 +129,7 @@ async function updateSpreadSheetWithResults(filePath, workbook, sheet, results){
         xlsx.writeFile(workbook, filePath);
         console.log('Resultados salvos!');
     } catch (e) {
-        throw `Error when saving file ${filePath}`;
+        throw `Erro ao salvar arquivo ${filePath}. Verifique se o arquivo ${filePath} está fechado e tente novamente.`;
     }
 }
 
