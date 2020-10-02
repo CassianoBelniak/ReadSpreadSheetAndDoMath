@@ -1,6 +1,6 @@
 // Constants declarations
 const xlsx = require('xlsx');
-const FILE_PATH = "Engenharia de Software - Cassiano.xlsx"
+const readline = require("readline");
 
 const INSCRITION_COLUMN = "A";
 const NAME_COLUMN = "B";
@@ -19,28 +19,37 @@ const SITUATION = {'APPROVED': 0, 'DISAPPROVED_BY_GRADE':1, 'DISAPPROVED_BY_FREQ
 const SITUATION_LABEL = {0:'Aprovado', 1: 'Reprovado por nota', 2: 'Reprovado por faltas', 3: 'Final'};
 
 // Program main execution
-try {
-    console.log('Starting program');
-    console.log(`Reading ${FILE_PATH} file`);
-    var workbook = readFile();
-    var sheet = getFirstSheet(workbook);
-    console.log('Calculating results...');
-    var results = getResults(sheet);
-    showResults(results);
-    console.log("Salving results");
-    updateSpreadSheetWithResults(workbook, sheet, results);
-    console.log('Done');
-} catch (e) {
-    console.error(e);
+async function main(){
+    try {
+        console.log('Starting program');
+        var filePath = await getFilename();
+        console.log(`Reading ${filePath} file`);
+        var workbook = readFile(filePath);
+        var sheet = getFirstSheet(workbook);
+        console.log('Calculating results...');
+        var results = getResults(sheet);
+        showResults(results);
+        console.log("Salving results");
+        updateSpreadSheetWithResults(filePath, workbook, sheet, results);
+        console.log('Done');
+    } catch (e) {
+        console.error(e);
+    }
 }
+main();
 
 
 // Function Declaration
-function readFile(){
+async function getFilename(){
+    var fileName = await readLineAsync('Entre com o caminho do arquivo: ');
+    return fileName;
+}
+
+function readFile(filePath){
     try {
-        return xlsx.readFile(FILE_PATH);
+        return xlsx.readFile(filePath);
     } catch (e) {
-        throw `Error reading ${FILE_PATH} file`; 
+        throw `Error reading ${filePath} file`; 
     }
 }
 
@@ -103,14 +112,27 @@ function pad(string, size){
     return string;
 }
 
-function updateSpreadSheetWithResults(workbook, sheet, results){
+function updateSpreadSheetWithResults(filePath, workbook, sheet, results){
     results.forEach(result=>{
         sheet[SITUATION_COLUMN+result.row] = {"v": SITUATION_LABEL[result.situation]};
         sheet[GRADE_FOR_APPROVATION_COLUMN+result.row] = {'v': result.finalGrade};
     });
     try{
-        xlsx.writeFile(workbook, FILE_PATH);
+        xlsx.writeFile(workbook, filePath);
     } catch (e) {
-        throw `Error when saving file ${FILE_PATH}`;
+        throw `Error when saving file ${filePath}`;
     }
 }
+
+function readLineAsync(message) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+    return new Promise((resolve, reject) => {
+      rl.question(message, (answer) => {
+        rl.close();
+        resolve(answer);
+      });
+    });
+} 
